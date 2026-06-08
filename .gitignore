@@ -43,3 +43,11 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Fitify — local-only / non-essential (not pushed)
+Screenshots/
+.claude/
+.agents/
+.mcp.json
+skills-lock.json
+**/build/
