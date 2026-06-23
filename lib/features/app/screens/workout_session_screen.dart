@@ -1,10 +1,13 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../data/models/workout.dart';
+import '../../../data/services/coach_copy.dart';
+import '../providers/plan_provider.dart';
 import '../widgets/app_widgets.dart';
 
 /// Guided workout session. The coach walks the user through each exercise with
@@ -89,6 +92,9 @@ class _WorkoutSessionScreenState extends State<WorkoutSessionScreen>
 
   void _finish() {
     _timer?.cancel();
+    final plan = context.read<PlanProvider>();
+    plan.markCompleteById(widget.workout.id);
+    final message = CoachCopy.sessionComplete(plan.completedThisWeek);
     showDialog<void>(
       context: context,
       barrierDismissible: false,
@@ -97,8 +103,7 @@ class _WorkoutSessionScreenState extends State<WorkoutSessionScreen>
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Text('Workout complete! 🎉', style: AppTextStyles.title),
         content: Text(
-          'Nice work — you finished ${widget.workout.title}.\n'
-          'Want a form check? Record a set and upload it in Analyze.',
+          '$message\n\nWant a form check? Record a set and upload it in Analyze.',
           style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
         ),
         actions: [
@@ -178,7 +183,7 @@ class _WorkoutSessionScreenState extends State<WorkoutSessionScreen>
                         minHeight: 6,
                         backgroundColor: AppColors.surfaceHighlight,
                         valueColor:
-                            const AlwaysStoppedAnimation(AppColors.accent),
+                            AlwaysStoppedAnimation(AppColors.accent),
                       ),
                     ),
                   ),

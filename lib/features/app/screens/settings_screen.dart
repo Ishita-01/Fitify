@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../providers/theme_provider.dart';
+import '../providers/units_controller.dart';
 import '../widgets/app_widgets.dart';
+import 'info_screens.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -13,10 +17,14 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   bool _notifications = true;
-  bool _darkMode = false;
+
+  void _go(BuildContext context, Widget screen) => Navigator.of(context)
+      .push(MaterialPageRoute(builder: (_) => screen));
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<ThemeController>();
+    final units = context.watch<UnitsController>();
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -41,14 +49,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   icon: Icons.workspace_premium_outlined,
                   label: 'Subscription',
                   trailing: 'Free',
-                  last: true),
+                  last: true,
+                  onTap: () => _go(context, const SubscriptionScreen())),
             ]),
             const SizedBox(height: 18),
             _group('Preferences', [
               _Row(
                   icon: Icons.straighten_rounded,
                   label: 'Units',
-                  trailing: 'Metric (kg, cm)'),
+                  trailing: units.label,
+                  onTap: () => context.read<UnitsController>().toggle()),
               _SwitchRow(
                 icon: Icons.notifications_none_rounded,
                 label: 'Notifications',
@@ -56,24 +66,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 onChanged: (v) => setState(() => _notifications = v),
               ),
               _SwitchRow(
-                icon: Icons.dark_mode_outlined,
+                icon: theme.isDark
+                    ? Icons.dark_mode_rounded
+                    : Icons.dark_mode_outlined,
                 label: 'Dark Mode',
-                subtitle: 'Currently Light · dark theme coming soon',
-                value: _darkMode,
+                subtitle: theme.isDark ? 'Premium dark' : 'Currently Light',
+                value: theme.isDark,
                 last: true,
-                onChanged: (v) {
-                  setState(() => _darkMode = false);
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                    content: Text('Dark theme is coming soon.'),
-                    behavior: SnackBarBehavior.floating,
-                  ));
-                },
+                onChanged: (v) => context.read<ThemeController>().setDark(v),
               ),
             ]),
             const SizedBox(height: 18),
             _group('Support', [
-              _Row(icon: Icons.help_outline_rounded, label: 'Help & FAQ'),
-              _Row(icon: Icons.lock_outline_rounded, label: 'Privacy Policy'),
+              _Row(
+                  icon: Icons.help_outline_rounded,
+                  label: 'Help & FAQ',
+                  onTap: () => _go(context, const HelpFaqScreen())),
+              _Row(
+                  icon: Icons.lock_outline_rounded,
+                  label: 'Privacy Policy',
+                  onTap: () => _go(context, const PrivacyPolicyScreen())),
               _Row(
                   icon: Icons.info_outline_rounded,
                   label: 'About',
@@ -122,20 +134,25 @@ class _Row extends StatelessWidget {
       {required this.icon,
       required this.label,
       this.trailing,
+      this.onTap,
       this.last = false});
   final IconData icon;
   final String label;
   final String? trailing;
+  final VoidCallback? onTap;
   final bool last;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 15),
       decoration: BoxDecoration(
         border: last
             ? null
-            : const Border(
+            : Border(
                 bottom: BorderSide(color: AppColors.border, width: 0.6)),
       ),
       child: Row(
@@ -150,8 +167,9 @@ class _Row extends StatelessWidget {
                     .copyWith(color: AppColors.textTertiary)),
             const SizedBox(width: 6),
           ],
-          const Icon(Icons.chevron_right_rounded, color: AppColors.textTertiary),
+          Icon(Icons.chevron_right_rounded, color: AppColors.textTertiary),
         ],
+      ),
       ),
     );
   }
@@ -180,7 +198,7 @@ class _SwitchRow extends StatelessWidget {
       decoration: BoxDecoration(
         border: last
             ? null
-            : const Border(
+            : Border(
                 bottom: BorderSide(color: AppColors.border, width: 0.6)),
       ),
       child: Row(

@@ -29,14 +29,39 @@ enum Difficulty {
   final String label;
 }
 
+/// The primary region an exercise trains — lets the plan engine assemble
+/// balanced sessions and honour splits (push/pull/legs etc).
+enum MuscleGroup {
+  fullBody('Full Body'),
+  chest('Chest'),
+  back('Back'),
+  legs('Legs'),
+  glutes('Glutes'),
+  core('Core'),
+  shoulders('Shoulders'),
+  arms('Arms'),
+  cardio('Cardio'),
+  mobility('Mobility');
+
+  const MuscleGroup(this.label);
+  final String label;
+}
+
+/// How an exercise is performed — maps onto the user's preferred [Activity]
+/// choices so the engine can bias selection toward what they enjoy.
+enum ExerciseModality { strength, cardio, hiit, mobility, stretching, yoga, calisthenics }
+
 /// A single exercise within a workout. [durationSec] drives a timed move;
-/// [reps] drives a counted move (one of the two is used).
+/// [reps] drives a counted move (one of the two is used). [muscle] and
+/// [modality] are metadata the plan engine reads (library seeds use defaults).
 class Exercise {
   final String name;
   final String description;
   final int? durationSec;
   final int? reps;
   final IconData icon;
+  final MuscleGroup muscle;
+  final ExerciseModality modality;
 
   const Exercise({
     required this.name,
@@ -44,7 +69,19 @@ class Exercise {
     this.durationSec,
     this.reps,
     this.icon = Icons.fitness_center_rounded,
+    this.muscle = MuscleGroup.fullBody,
+    this.modality = ExerciseModality.strength,
   });
+
+  Exercise copyWith({int? durationSec, int? reps}) => Exercise(
+        name: name,
+        description: description,
+        durationSec: durationSec ?? this.durationSec,
+        reps: reps ?? this.reps,
+        icon: icon,
+        muscle: muscle,
+        modality: modality,
+      );
 
   bool get isTimed => durationSec != null;
 

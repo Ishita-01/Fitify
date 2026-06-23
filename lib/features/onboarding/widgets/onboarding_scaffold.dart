@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/glass.dart';
 import '../../../core/widgets/primary_button.dart';
 import 'robot_tip.dart';
 
@@ -47,7 +48,8 @@ class OnboardingScaffold extends StatelessWidget {
     final canPop = Navigator.of(context).canPop();
     return Scaffold(
       backgroundColor: AppColors.onbBackground,
-      body: Stack(
+      body: AmbientBackground(
+        child: Stack(
         children: [
           const _SlashDecoration(),
           SafeArea(
@@ -108,6 +110,7 @@ class OnboardingScaffold extends StatelessWidget {
             ),
           ),
         ],
+        ),
       ),
     );
   }

@@ -4,16 +4,25 @@ import 'package:flutter/material.dart';
 /// upload a recorded video of an exercise, a (future) ML service evaluates it,
 /// and a detailed report is returned. No real-time/camera processing.
 
+/// The 12 exercises our pose classifier recognises (must match the model's
+/// label map). `slug` is the lower-case name the ML backend returns.
 enum AnalyzableExercise {
-  squat('Squat', Icons.airline_seat_legroom_reduced_rounded),
-  pushUp('Push-Up', Icons.fitness_center_rounded),
-  plank('Plank', Icons.airline_seat_flat_rounded),
-  lunges('Lunges', Icons.directions_walk_rounded),
-  deadlift('Deadlift', Icons.sports_mma_rounded),
-  shoulderPress('Shoulder Press', Icons.sports_gymnastics_rounded);
+  squat('Squat', 'squat', Icons.accessibility_new_rounded),
+  deadlift('Deadlift', 'deadlift', Icons.fitness_center_rounded),
+  romanianDeadlift('Romanian Deadlift', 'romanian deadlift', Icons.straighten_rounded),
+  pushUp('Push-Up', 'push-up', Icons.sports_martial_arts_rounded),
+  pullUp('Pull-Up', 'pull up', Icons.sports_handball_rounded),
+  shoulderPress('Shoulder Press', 'shoulder press', Icons.sports_gymnastics_rounded),
+  hammerCurl('Hammer Curl', 'hammer curl', Icons.sports_mma_rounded),
+  lateralRaise('Lateral Raise', 'lateral raise', Icons.open_in_full_rounded),
+  plank('Plank', 'plank', Icons.airline_seat_flat_rounded),
+  legRaises('Leg Raises', 'leg raises', Icons.airline_seat_legroom_extra_rounded),
+  russianTwist('Russian Twist', 'russian twist', Icons.rotate_right_rounded),
+  hipThrust('Hip Thrust', 'hip thrust', Icons.airline_seat_recline_normal_rounded);
 
-  const AnalyzableExercise(this.label, this.icon);
+  const AnalyzableExercise(this.label, this.slug, this.icon);
   final String label;
+  final String slug;
   final IconData icon;
 }
 

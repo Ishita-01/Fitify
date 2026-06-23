@@ -25,11 +25,15 @@ class SelectableChip extends StatelessWidget {
         duration: const Duration(milliseconds: 150),
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 13),
         decoration: BoxDecoration(
-          color: selected ? AppColors.onbCardSelected : AppColors.onbCard,
+          color: selected
+              ? AppColors.onbCardSelected.withValues(alpha: 0.80)
+              : Colors.white.withValues(alpha: 0.55),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: selected ? AppColors.onbPrimary : AppColors.onbBorder,
-            width: selected ? 1.6 : 1.4,
+            color: selected
+                ? AppColors.onbPrimary
+                : Colors.white.withValues(alpha: 0.75),
+            width: selected ? 1.6 : 1.2,
           ),
         ),
         child: Text(

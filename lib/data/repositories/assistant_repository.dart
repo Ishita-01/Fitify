@@ -7,12 +7,17 @@ import '../models/chat_message.dart';
 /// To plug in a real model later, implement [reply] with an API client and
 /// swap the binding in main.dart — no UI changes required.
 abstract class AssistantRepository {
-  Future<String> reply(String prompt, List<ChatMessage> history);
+  /// [context] is an optional personalization brief (profile + plan summary)
+  /// that LLM-backed implementations weave into their system prompt. Offline
+  /// implementations may ignore it.
+  Future<String> reply(String prompt, List<ChatMessage> history,
+      {String context = ''});
 }
 
 class MockAssistantRepository implements AssistantRepository {
   @override
-  Future<String> reply(String prompt, List<ChatMessage> history) async {
+  Future<String> reply(String prompt, List<ChatMessage> history,
+      {String context = ''}) async {
     await Future<void>.delayed(const Duration(milliseconds: 700));
     final p = prompt.toLowerCase();
 

@@ -38,6 +38,11 @@ dependencies:
   google_fonts: ^8.1.0
   shared_preferences: ^2.5.5
   smooth_page_indicator: ^2.0.1
+  http: ^1.2.0
+  flutter_dotenv: ^5.1.0
+  image_picker: ^1.2.2
+  file_picker: ^11.0.2
+  liquid_glass_renderer: ^0.2.0-dev.4
 
 dev_dependencies:
   flutter_test:
@@ -60,6 +65,9 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+
+  assets:
+    - assets/.env
 
   # To add assets to your application, add an assets section, like this:
   # assets:

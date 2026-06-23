@@ -112,7 +112,7 @@ class EmgScreen extends StatelessWidget {
                       decoration: BoxDecoration(
                         border: i == _future.length - 1
                             ? null
-                            : const Border(
+                            : Border(
                                 bottom: BorderSide(
                                     color: AppColors.border, width: 0.6)),
                       ),
@@ -176,7 +176,7 @@ class _ActivationBar extends StatelessWidget {
             value: reading.activationPct / 100,
             minHeight: 8,
             backgroundColor: AppColors.surfaceHighlight,
-            valueColor: const AlwaysStoppedAnimation(AppColors.accent),
+            valueColor: AlwaysStoppedAnimation(AppColors.accent),
           ),
         ),
       ],

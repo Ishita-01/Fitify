@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -99,9 +101,13 @@ class _AssistantTabState extends State<AssistantTab> {
                           alignment: Alignment.center,
                           padding: const EdgeInsets.symmetric(horizontal: 14),
                           decoration: BoxDecoration(
-                            color: AppColors.surface,
+                            color: AppColors.isDark
+                                ? AppColors.accent.withValues(alpha: 0.14)
+                                : Colors.white.withValues(alpha: 0.55),
                             borderRadius: BorderRadius.circular(20),
-                            border: Border.all(color: AppColors.accent),
+                            border: Border.all(
+                                color:
+                                    AppColors.accent.withValues(alpha: 0.55)),
                           ),
                           child: Text(s,
                               style: AppTextStyles.caption
@@ -126,6 +132,14 @@ class _Bubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isUser = message.isUser;
+    final dark = AppColors.isDark;
+    // Coach bubble: black glass in dark, frosted white in light.
+    final coachFill = dark
+        ? const Color(0xFF191B21)
+        : Colors.white.withValues(alpha: 0.62);
+    final coachBorder = dark
+        ? Colors.white.withValues(alpha: 0.06)
+        : Colors.white.withValues(alpha: 0.75);
     return Align(
       alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
@@ -134,25 +148,102 @@ class _Bubble extends StatelessWidget {
         constraints: BoxConstraints(
             maxWidth: MediaQuery.of(context).size.width * 0.78),
         decoration: BoxDecoration(
-          color: isUser ? AppColors.accent : AppColors.surface,
+          color: isUser ? AppColors.accent.withValues(alpha: 0.95) : coachFill,
           borderRadius: BorderRadius.only(
             topLeft: const Radius.circular(18),
             topRight: const Radius.circular(18),
             bottomLeft: Radius.circular(isUser ? 18 : 4),
             bottomRight: Radius.circular(isUser ? 4 : 18),
           ),
-          border: isUser ? null : Border.all(color: AppColors.border),
+          border: Border.all(
+              color: isUser
+                  ? Colors.white.withValues(alpha: 0.18)
+                  : coachBorder),
+          boxShadow: [
+            BoxShadow(
+              color: dark
+                  ? Colors.black.withValues(alpha: 0.30)
+                  : const Color(0xFF1B2559).withValues(alpha: 0.06),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
-        child: Text(
-          message.text,
-          style: AppTextStyles.body.copyWith(
-            color: isUser ? Colors.white : AppColors.textPrimary,
-            fontSize: 14.5,
-            height: 1.4,
-          ),
+        child: _CoachText(
+          text: message.text,
+          color: isUser ? Colors.white : AppColors.textPrimary,
         ),
       ),
     );
+  }
+}
+
+/// Renders coach text with light markdown: **bold** runs and `- ` bullet lines,
+/// so replies read as formatted points rather than one grey blob. No package —
+/// keeps the app light.
+class _CoachText extends StatelessWidget {
+  const _CoachText({required this.text, required this.color});
+  final String text;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    final base = AppTextStyles.body
+        .copyWith(color: color, fontSize: 14.5, height: 1.42);
+    final lines = text.split('\n');
+    final widgets = <Widget>[];
+    for (final raw in lines) {
+      final line = raw.trimRight();
+      if (line.isEmpty) {
+        widgets.add(const SizedBox(height: 6));
+        continue;
+      }
+      final bullet = line.startsWith('- ') || line.startsWith('• ');
+      final content = bullet ? line.substring(2) : line;
+      final span = TextSpan(style: base, children: _spans(content, base));
+      if (bullet) {
+        widgets.add(Padding(
+          padding: const EdgeInsets.only(bottom: 3),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 1, right: 8),
+                child: Text('•',
+                    style: base.copyWith(color: AppColors.accent)),
+              ),
+              Expanded(child: Text.rich(span)),
+            ],
+          ),
+        ));
+      } else {
+        widgets.add(Padding(
+          padding: const EdgeInsets.only(bottom: 2),
+          child: Text.rich(span),
+        ));
+      }
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: widgets,
+    );
+  }
+
+  // Split a line on **…** into bold / normal spans.
+  List<TextSpan> _spans(String line, TextStyle base) {
+    final spans = <TextSpan>[];
+    final re = RegExp(r'\*\*(.+?)\*\*');
+    var i = 0;
+    for (final m in re.allMatches(line)) {
+      if (m.start > i) spans.add(TextSpan(text: line.substring(i, m.start)));
+      spans.add(TextSpan(
+          text: m.group(1),
+          style: base.copyWith(fontWeight: FontWeight.w700)));
+      i = m.end;
+    }
+    if (i < line.length) spans.add(TextSpan(text: line.substring(i)));
+    return spans;
   }
 }
 
@@ -160,15 +251,20 @@ class _TypingBubble extends StatelessWidget {
   const _TypingBubble();
   @override
   Widget build(BuildContext context) {
+    final dark = AppColors.isDark;
     return Align(
       alignment: Alignment.centerLeft,
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: dark
+              ? const Color(0xFF191B21)
+              : Colors.white.withValues(alpha: 0.60),
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: AppColors.border),
+          border: Border.all(
+              color: Colors.white
+                  .withValues(alpha: dark ? 0.06 : 0.75)),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -192,7 +288,7 @@ class _Dot extends StatelessWidget {
     return Container(
       width: 7,
       height: 7,
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
           color: AppColors.textTertiary, shape: BoxShape.circle),
     );
   }
@@ -205,14 +301,24 @@ class _InputBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.fromLTRB(
-          16, 10, 16, 10 + MediaQuery.of(context).padding.bottom),
-      decoration: const BoxDecoration(
-        color: AppColors.surface,
-        border: Border(top: BorderSide(color: AppColors.border, width: 0.6)),
-      ),
-      child: Row(
+    final dark = AppColors.isDark;
+    return ClipRect(
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+        child: Container(
+          padding: EdgeInsets.fromLTRB(
+              16, 10, 16, 10 + MediaQuery.of(context).padding.bottom),
+          decoration: BoxDecoration(
+            color: dark
+                ? AppColors.background.withValues(alpha: 0.92)
+                : Colors.white.withValues(alpha: 0.45),
+            border: Border(
+                top: BorderSide(
+                    color: Colors.white
+                        .withValues(alpha: dark ? 0.06 : 0.70),
+                    width: 1)),
+          ),
+          child: Row(
         children: [
           Expanded(
             child: TextField(
@@ -226,7 +332,9 @@ class _InputBar extends StatelessWidget {
                 hintStyle:
                     AppTextStyles.body.copyWith(color: AppColors.textTertiary),
                 filled: true,
-                fillColor: AppColors.background,
+                fillColor: dark
+                    ? AppColors.surfaceElevated
+                    : Colors.white.withValues(alpha: 0.65),
                 contentPadding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 border: OutlineInputBorder(
@@ -247,7 +355,9 @@ class _InputBar extends StatelessWidget {
               child: const Icon(Icons.arrow_upward_rounded, color: Colors.white),
             ),
           ),
-        ],
+          ],
+          ),
+        ),
       ),
     );
   }

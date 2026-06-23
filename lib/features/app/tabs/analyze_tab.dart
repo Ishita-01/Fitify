@@ -1,8 +1,11 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/widgets/glass.dart';
 import '../../../data/models/analysis.dart';
 import '../providers/analysis_provider.dart';
 import '../screens/analysis_report_screen.dart';
@@ -18,6 +21,45 @@ class AnalyzeTab extends StatefulWidget {
 
 class _AnalyzeTabState extends State<AnalyzeTab> {
   String? _fileName;
+  String? _videoPath; // real file path — sent to the analysis backend later
+
+  void _setPicked(String? path) {
+    if (path == null) return;
+    setState(() {
+      _videoPath = path;
+      _fileName = path.split('/').last;
+    });
+  }
+
+  Future<void> _showUploadOptions() async {
+    final choice = await showModalBottomSheet<String>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (_) => const _UploadSheet(),
+    );
+    if (choice == null || !mounted) return;
+    try {
+      switch (choice) {
+        case 'photos':
+          final x = await ImagePicker().pickVideo(source: ImageSource.gallery);
+          _setPicked(x?.path);
+        case 'record':
+          final x = await ImagePicker().pickVideo(
+              source: ImageSource.camera,
+              maxDuration: const Duration(seconds: 60));
+          _setPicked(x?.path);
+        case 'files':
+          final res = await FilePicker.pickFiles(type: FileType.video);
+          _setPicked(res?.files.single.path);
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Could not open: $e'),
+        behavior: SnackBarBehavior.floating,
+      ));
+    }
+  }
 
   Future<void> _runAnalysis() async {
     final provider = context.read<AnalysisProvider>();
@@ -30,7 +72,10 @@ class _AnalyzeTabState extends State<AnalyzeTab> {
     final report = await provider.submit(exercise, fileName: _fileName ?? 'clip.mp4');
     if (!mounted) return;
     Navigator.of(context).pop(); // dismiss processing
-    setState(() => _fileName = null);
+    setState(() {
+      _fileName = null;
+      _videoPath = null;
+    });
     Navigator.of(context).push(MaterialPageRoute(
         builder: (_) => AnalysisReportScreen(report: report)));
   }
@@ -43,7 +88,7 @@ class _AnalyzeTabState extends State<AnalyzeTab> {
     return SafeArea(
       bottom: false,
       child: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 120),
         children: [
           Text('Analyze', style: AppTextStyles.display.copyWith(fontSize: 28)),
           const SizedBox(height: 4),
@@ -65,16 +110,14 @@ class _AnalyzeTabState extends State<AnalyzeTab> {
           Text('2. Upload your video', style: AppTextStyles.title),
           const SizedBox(height: 10),
           GestureDetector(
-            onTap: () => setState(() => _fileName = 'workout_${provider.selected.name}.mp4'),
+            onTap: _showUploadOptions,
             child: DottedUploadBox(fileName: _fileName),
           ),
           const SizedBox(height: 18),
           GradientButton(
             label: 'Analyze Video',
             icon: Icons.auto_awesome_rounded,
-            onPressed: _fileName == null
-                ? null
-                : _runAnalysis,
+            onPressed: _videoPath == null ? null : _runAnalysis,
           ),
           const SizedBox(height: 28),
 
@@ -118,19 +161,16 @@ class _ExerciseDropdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return GlassSurface(
+      radius: 16,
+      opacity: 0.45,
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.border),
-      ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<AnalyzableExercise>(
           value: value,
           isExpanded: true,
           borderRadius: BorderRadius.circular(14),
-          icon: const Icon(Icons.keyboard_arrow_down_rounded,
+          icon: Icon(Icons.keyboard_arrow_down_rounded,
               color: AppColors.textSecondary),
           items: [
             for (final e in AnalyzableExercise.values)
@@ -152,6 +192,114 @@ class _ExerciseDropdown extends StatelessWidget {
   }
 }
 
+class _UploadSheet extends StatelessWidget {
+  const _UploadSheet();
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
+        child: GlassSurface(
+          radius: 26,
+          opacity: AppColors.isDark ? 0.16 : 0.85,
+          padding: const EdgeInsets.fromLTRB(8, 14, 8, 8),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: AppColors.textTertiary.withValues(alpha: 0.5),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 14),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text('Add a video',
+                      style: AppTextStyles.title.copyWith(fontSize: 16)),
+                ),
+              ),
+              const SizedBox(height: 8),
+              _SheetOption(
+                  icon: Icons.photo_library_rounded,
+                  title: 'Choose from Photos',
+                  subtitle: 'Pick an existing video',
+                  onTap: () => Navigator.pop(context, 'photos')),
+              _SheetOption(
+                  icon: Icons.folder_rounded,
+                  title: 'Choose from Files',
+                  subtitle: 'Browse the Files app',
+                  onTap: () => Navigator.pop(context, 'files')),
+              _SheetOption(
+                  icon: Icons.videocam_rounded,
+                  title: 'Record a set',
+                  subtitle: 'Up to 60 seconds',
+                  onTap: () => Navigator.pop(context, 'record')),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SheetOption extends StatelessWidget {
+  const _SheetOption({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(16),
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 11),
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: AppColors.accentMuted,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, color: AppColors.accent),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: AppTextStyles.title.copyWith(fontSize: 15.5)),
+                  const SizedBox(height: 2),
+                  Text(subtitle,
+                      style: AppTextStyles.caption
+                          .copyWith(color: AppColors.textTertiary)),
+                ],
+              ),
+            ),
+            Icon(Icons.chevron_right_rounded, color: AppColors.textTertiary),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class DottedUploadBox extends StatelessWidget {
   const DottedUploadBox({super.key, this.fileName});
   final String? fileName;
@@ -159,18 +307,14 @@ class DottedUploadBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final has = fileName != null;
-    return Container(
-      height: 150,
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: has ? AppColors.accentMuted : AppColors.surface,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: has ? AppColors.accent : AppColors.border,
-          width: 1.5,
-        ),
-      ),
-      child: Column(
+    return LiquidPanel(
+      radius: 20,
+      tint: has ? AppColors.accentSoft : null,
+      padding: EdgeInsets.zero,
+      child: SizedBox(
+        height: 150,
+        width: double.infinity,
+        child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(has ? Icons.check_circle_rounded : Icons.cloud_upload_outlined,
@@ -182,7 +326,8 @@ class DottedUploadBox extends StatelessWidget {
           Text(has ? 'Ready to analyze' : 'MP4 · up to 60s works best',
               style: AppTextStyles.caption
                   .copyWith(color: AppColors.textTertiary)),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -196,8 +341,17 @@ class _EmgTeaser extends StatelessWidget {
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-            colors: [Color(0xFF6D28D9), Color(0xFF4338CA)]),
-        borderRadius: BorderRadius.circular(20),
+            colors: [Color(0xD96D28D9), Color(0xE64338CA)]),
+        borderRadius: BorderRadius.circular(22),
+        border:
+            Border.all(color: Colors.white.withValues(alpha: 0.40), width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF6D28D9).withValues(alpha: 0.30),
+            blurRadius: 24,
+            offset: const Offset(0, 10),
+          ),
+        ],
       ),
       child: Row(
         children: [
@@ -256,13 +410,10 @@ class _HistoryRow extends StatelessWidget {
               builder: (_) => AnalysisReportScreen(report: report))),
       child: Container(
         margin: const EdgeInsets.only(bottom: 10),
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.border),
-        ),
-        child: Row(
+        child: GlassSurface(
+          radius: 18,
+          padding: const EdgeInsets.all(14),
+          child: Row(
           children: [
             Container(
               width: 44,
@@ -297,6 +448,7 @@ class _HistoryRow extends StatelessWidget {
                   style: AppTextStyles.statValue
                       .copyWith(color: _scoreColor(report.overallScore))),
           ],
+          ),
         ),
       ),
     );

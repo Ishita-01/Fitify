@@ -38,19 +38,23 @@ class SelectableCard extends StatelessWidget {
         curve: Curves.easeOut,
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
         decoration: BoxDecoration(
-          color: selected ? AppColors.onbCardSelected : AppColors.onbCard,
+          color: selected
+              ? AppColors.onbCardSelected.withValues(alpha: 0.80)
+              : Colors.white.withValues(alpha: 0.55),
           borderRadius: BorderRadius.circular(AppRadius.card),
           border: Border.all(
-            color: selected ? AppColors.onbPrimary : Colors.transparent,
-            width: selected ? 2 : 1.5,
+            color: selected
+                ? AppColors.onbPrimary
+                : Colors.white.withValues(alpha: 0.75),
+            width: selected ? 2 : 1.2,
           ),
           boxShadow: selected
               ? null
               : [
                   BoxShadow(
-                    color: const Color(0xFF1B2559).withValues(alpha: 0.05),
-                    blurRadius: 14,
-                    offset: const Offset(0, 6),
+                    color: const Color(0xFF1B2559).withValues(alpha: 0.06),
+                    blurRadius: 16,
+                    offset: const Offset(0, 7),
                   ),
                 ],
         ),

@@ -6,7 +6,9 @@ import '../../../data/services/local_storage_service.dart';
 
 /// Holds the in-progress onboarding answers and persists them when complete.
 class OnboardingProvider extends ChangeNotifier {
-  OnboardingProvider(this._storage);
+  OnboardingProvider(this._storage) {
+    _hydrate();
+  }
 
   final LocalStorageService _storage;
 
@@ -16,6 +18,16 @@ class OnboardingProvider extends ChangeNotifier {
     targetWeightKg: 65,
   );
   UserProfile get profile => _profile;
+
+  /// Load a previously-saved profile at startup so a returning user (or a dev
+  /// running with onboarding skipped) sees their real, personalised data.
+  Future<void> _hydrate() async {
+    final saved = await _storage.loadProfile();
+    if (saved != null) {
+      _profile = saved;
+      notifyListeners();
+    }
+  }
 
   void _update(UserProfile next) {
     _profile = next;

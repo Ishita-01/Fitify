@@ -4,6 +4,12 @@
 <dict>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>Fitify needs the camera so you can record a set to analyze your form.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Fitify records audio with your video; it is only used for your form analysis.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Fitify needs access to your photos so you can pick a workout video to analyze.</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>

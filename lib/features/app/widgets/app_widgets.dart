@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/widgets/glass.dart';
 
-/// Rounded dark card used across the main-app tabs.
+/// Liquid-glass card used across the main-app tabs. (Name kept from the old
+/// dark skin to avoid touching every call site.)
 class DarkCard extends StatelessWidget {
   const DarkCard({
     super.key,
@@ -20,13 +22,10 @@ class DarkCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
+    return GlassSurface(
+      radius: radius,
       padding: padding,
-      decoration: BoxDecoration(
-        color: color ?? AppColors.surface,
-        borderRadius: BorderRadius.circular(radius),
-      ),
+      tint: color,
       child: child,
     );
   }

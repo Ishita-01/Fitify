@@ -3,9 +3,12 @@ import 'package:provider/provider.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/widgets/glass.dart';
 import '../../../data/models/analysis.dart';
 import '../../onboarding/providers/onboarding_provider.dart';
 import '../providers/analysis_provider.dart';
+import '../providers/plan_provider.dart';
+import '../providers/units_controller.dart';
 import '../screens/analysis_report_screen.dart';
 import '../screens/settings_screen.dart';
 import '../widgets/app_widgets.dart';
@@ -19,13 +22,15 @@ class ProfileTab extends StatelessWidget {
     final p = onb.profile;
     final name = (p.name?.trim().isNotEmpty ?? false) ? p.name!.trim() : 'Athlete';
     final reports = context.watch<AnalysisProvider>().completed;
+    final plan = context.watch<PlanProvider>();
+    final units = context.watch<UnitsController>();
     final current = p.currentWeightKg ?? 90;
     final target = p.targetWeightKg ?? 70;
 
     return SafeArea(
       bottom: false,
       child: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 120),
         children: [
           Row(
             children: [
@@ -46,9 +51,9 @@ class ProfileTab extends StatelessWidget {
                 Container(
                   width: 64,
                   height: 64,
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                       shape: BoxShape.circle, color: AppColors.surfaceElevated),
-                  child: const Icon(Icons.person_rounded,
+                  child: Icon(Icons.person_rounded,
                       size: 36, color: AppColors.textSecondary),
                 ),
                 const SizedBox(width: 16),
@@ -61,7 +66,7 @@ class ProfileTab extends StatelessWidget {
                       Text(
                           [
                             if (p.gender != null) p.gender!.label,
-                            if (p.heightCm != null) '${p.heightCm} cm',
+                            if (p.heightCm != null) units.height(p.heightCm!),
                           ].join(' · '),
                           style: AppTextStyles.caption
                               .copyWith(color: AppColors.textSecondary)),
@@ -89,13 +94,43 @@ class ProfileTab extends StatelessWidget {
           // Stats row.
           Row(
             children: [
-              Expanded(child: _StatTile(value: '12', label: 'Workouts')),
+              Expanded(
+                  child: _StatTile(
+                      value: '${plan.completedThisWeek}', label: 'Done this week')),
               const SizedBox(width: 12),
               Expanded(child: _StatTile(value: '${reports.length}', label: 'Analyses')),
               const SizedBox(width: 12),
-              Expanded(child: _StatTile(value: '5', label: 'Day streak')),
+              Expanded(
+                  child: _StatTile(
+                      value: '${plan.sessionsThisWeek}', label: 'Weekly goal')),
             ],
           ),
+          if (plan.plan != null) ...[
+            const SizedBox(height: 16),
+            DarkCard(
+              child: Row(
+                children: [
+                  Icon(Icons.auto_awesome_rounded,
+                      color: AppColors.accent, size: 22),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Your plan: ${plan.plan!.splitName}',
+                            style: AppTextStyles.label),
+                        const SizedBox(height: 2),
+                        Text(
+                            '${plan.sessionsThisWeek} sessions/week · week ${plan.weekIndex + 1}',
+                            style: AppTextStyles.caption.copyWith(
+                                color: AppColors.textSecondary)),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
           const SizedBox(height: 24),
           Text('Fitness Goals', style: AppTextStyles.heading),
           const SizedBox(height: 12),
@@ -138,9 +173,9 @@ class ProfileTab extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    _wCol('Current', '$current kg', AppColors.textPrimary),
+                    _wCol('Current', units.weight(current), AppColors.textPrimary),
                     const Spacer(),
-                    _wCol('Goal', '$target kg', AppColors.accent),
+                    _wCol('Goal', units.weight(target), AppColors.accent),
                   ],
                 ),
                 const SizedBox(height: 14),
@@ -150,7 +185,7 @@ class ProfileTab extends StatelessWidget {
                     value: target < current ? (target / current).clamp(0, 1) : 1,
                     minHeight: 10,
                     backgroundColor: AppColors.surfaceHighlight,
-                    valueColor: const AlwaysStoppedAnimation(AppColors.accent),
+                    valueColor: AlwaysStoppedAnimation(AppColors.accent),
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -169,7 +204,7 @@ class ProfileTab extends StatelessWidget {
           const SizedBox(height: 12),
           Row(
             children: [
-              for (final a in const [
+              for (final a in [
                 ('First Workout', Icons.flag_rounded, AppColors.accent),
                 ('5-Day Streak', Icons.local_fire_department_rounded, AppColors.warning),
                 ('Form Master', Icons.verified_rounded, AppColors.success),
@@ -241,7 +276,7 @@ class ProfileTab extends StatelessWidget {
             hintText: 'Your name',
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: AppColors.accent),
+              borderSide: BorderSide(color: AppColors.accent),
             ),
           ),
         ),
@@ -297,13 +332,10 @@ class _HistoryRow extends StatelessWidget {
           builder: (_) => AnalysisReportScreen(report: report))),
       child: Container(
         margin: const EdgeInsets.only(bottom: 10),
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.border),
-        ),
-        child: Row(
+        child: GlassSurface(
+          radius: 18,
+          padding: const EdgeInsets.all(14),
+          child: Row(
           children: [
             Container(
               width: 44,
@@ -326,6 +358,7 @@ class _HistoryRow extends StatelessWidget {
                             ? AppColors.warning
                             : AppColors.danger)),
           ],
+          ),
         ),
       ),
     );

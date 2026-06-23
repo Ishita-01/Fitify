@@ -5,6 +5,75 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 
+/// A compact 7-day activity bar strip (Mon→Sun). `values` are 0..1 heights;
+/// `todayIndex` (0..6) is highlighted.
+class WeeklyBars extends StatelessWidget {
+  const WeeklyBars({
+    super.key,
+    required this.values,
+    required this.todayIndex,
+    this.height = 70,
+  });
+
+  final List<double> values; // length 7
+  final int todayIndex;
+  final double height;
+
+  static const _days = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: height + 30,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          for (var i = 0; i < 7; i++)
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TweenAnimationBuilder<double>(
+                    tween: Tween(begin: 0, end: values[i].clamp(0.06, 1.0)),
+                    duration: Duration(milliseconds: 500 + i * 60),
+                    curve: Curves.easeOut,
+                    builder: (_, v, _) => Container(
+                      width: 14,
+                      height: height * v,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: i == todayIndex
+                              ? [const Color(0xFF3B82FF), AppColors.accent]
+                              : [
+                                  AppColors.accent.withValues(alpha: 0.35),
+                                  AppColors.accent.withValues(alpha: 0.18),
+                                ],
+                        ),
+                        borderRadius: BorderRadius.circular(7),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(_days[i],
+                      style: AppTextStyles.caption.copyWith(
+                          fontSize: 11,
+                          color: i == todayIndex
+                              ? AppColors.accent
+                              : AppColors.textTertiary,
+                          fontWeight: i == todayIndex
+                              ? FontWeight.w700
+                              : FontWeight.w500)),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
 /// Circular progress ring with a centered child (score / percent).
 class RingProgress extends StatelessWidget {
   const RingProgress({
@@ -12,14 +81,14 @@ class RingProgress extends StatelessWidget {
     required this.value, // 0..1
     this.size = 96,
     this.stroke = 9,
-    this.color = AppColors.accent,
+    this.color,
     this.child,
   });
 
   final double value;
   final double size;
   final double stroke;
-  final Color color;
+  final Color? color;
   final Widget? child;
 
   @override
@@ -32,7 +101,7 @@ class RingProgress extends StatelessWidget {
         duration: const Duration(milliseconds: 700),
         curve: Curves.easeOut,
         builder: (context, v, _) => CustomPaint(
-          painter: _RingPainter(v, stroke, color),
+          painter: _RingPainter(v, stroke, color ?? AppColors.accent),
           child: Center(child: child),
         ),
       ),
@@ -80,13 +149,13 @@ class RadarChart extends StatelessWidget {
     required this.labels,
     required this.values, // 0..100 each, same length as labels
     this.size = 240,
-    this.color = AppColors.accent,
+    this.color,
   });
 
   final List<String> labels;
   final List<int> values;
   final double size;
-  final Color color;
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
@@ -98,7 +167,7 @@ class RadarChart extends StatelessWidget {
         duration: const Duration(milliseconds: 700),
         curve: Curves.easeOut,
         builder: (context, t, _) => CustomPaint(
-          painter: _RadarPainter(labels, values, color, t),
+          painter: _RadarPainter(labels, values, color ?? AppColors.accent, t),
         ),
       ),
     );

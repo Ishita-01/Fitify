@@ -1,0 +1,12 @@
+# Fitify ML pipeline (Path B: pose-landmark classifier).
+# On Kaggle, torch / numpy / scikit-learn / opencv are pre-installed; the only
+# pip-installs you usually need are mediapipe + onnxscript. Listed in full for
+# local/other environments.
+mediapipe
+opencv-python
+torch
+numpy
+scikit-learn
+onnx
+onnxscript
+tqdm

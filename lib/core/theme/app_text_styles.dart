@@ -3,36 +3,41 @@ import 'package:google_fonts/google_fonts.dart';
 
 import 'app_colors.dart';
 
-/// Typography for Fitify. Poppins for display/headings, Inter for body/UI.
+/// Typography for Fitify — an "athletic premium" pairing:
+/// - **Space Grotesk** for display/headings/buttons (modern, sporty grotesk).
+/// - **Inter** for body/UI text (the clean, SF-like workhorse).
+/// - **Bebas Neue** for big stat numbers (condensed, scoreboard energy).
 class AppTextStyles {
   AppTextStyles._();
 
-  static TextStyle get display => GoogleFonts.poppins(
+  static TextStyle get display => GoogleFonts.spaceGrotesk(
         fontSize: 32,
         fontWeight: FontWeight.w700,
-        height: 1.15,
+        height: 1.12,
+        letterSpacing: -0.8,
+        color: AppColors.textPrimary,
+      );
+
+  static TextStyle get headingLarge => GoogleFonts.spaceGrotesk(
+        fontSize: 26,
+        fontWeight: FontWeight.w700,
+        height: 1.18,
         letterSpacing: -0.5,
         color: AppColors.textPrimary,
       );
 
-  static TextStyle get headingLarge => GoogleFonts.poppins(
-        fontSize: 26,
-        fontWeight: FontWeight.w700,
-        height: 1.2,
+  static TextStyle get heading => GoogleFonts.spaceGrotesk(
+        fontSize: 22,
+        fontWeight: FontWeight.w600,
+        height: 1.22,
         letterSpacing: -0.3,
         color: AppColors.textPrimary,
       );
 
-  static TextStyle get heading => GoogleFonts.poppins(
-        fontSize: 22,
-        fontWeight: FontWeight.w600,
-        height: 1.25,
-        color: AppColors.textPrimary,
-      );
-
-  static TextStyle get title => GoogleFonts.poppins(
+  static TextStyle get title => GoogleFonts.spaceGrotesk(
         fontSize: 18,
         fontWeight: FontWeight.w600,
+        letterSpacing: -0.2,
         color: AppColors.textPrimary,
       );
 
@@ -62,15 +67,19 @@ class AppTextStyles {
         color: AppColors.textSecondary,
       );
 
-  static TextStyle get button => GoogleFonts.poppins(
+  static TextStyle get button => GoogleFonts.spaceGrotesk(
         fontSize: 16,
         fontWeight: FontWeight.w600,
-        letterSpacing: 0.2,
+        letterSpacing: 0.1,
       );
 
-  static TextStyle get statValue => GoogleFonts.poppins(
-        fontSize: 24,
-        fontWeight: FontWeight.w700,
+  /// Big numeric display (streaks, percentages, scores, kcal). Bebas Neue is
+  /// condensed and single-weight, so it's sized up vs the old Poppins value.
+  static TextStyle get statValue => GoogleFonts.bebasNeue(
+        fontSize: 30,
+        fontWeight: FontWeight.w400,
+        height: 1.0,
+        letterSpacing: 0.5,
         color: AppColors.textPrimary,
       );
 }

@@ -25,25 +25,28 @@ class AppSpacing {
 class AppTheme {
   AppTheme._();
 
-  /// Light theme used app-wide (light-first). A dark variant will be added as a
-  /// Settings toggle later.
-  static ThemeData get light {
-    final base = ThemeData.light(useMaterial3: true);
+  /// The active theme, resolved against [AppColors.isDark]. Rebuilt by
+  /// `MaterialApp` whenever `ThemeController` toggles the mode.
+  static ThemeData get current {
+    final dark = AppColors.isDark;
+    final base =
+        (dark ? ThemeData.dark(useMaterial3: true) : ThemeData.light(useMaterial3: true));
+    final scheme = (dark ? const ColorScheme.dark() : const ColorScheme.light()).copyWith(
+      surface: AppColors.background,
+      primary: AppColors.accent,
+      secondary: AppColors.accent,
+      error: AppColors.danger,
+      onPrimary: Colors.white,
+      onSurface: AppColors.textPrimary,
+    );
     return base.copyWith(
       scaffoldBackgroundColor: AppColors.background,
-      colorScheme: const ColorScheme.light(
-        surface: AppColors.background,
-        primary: AppColors.accent,
-        secondary: AppColors.accent,
-        error: AppColors.danger,
-        onPrimary: Colors.white,
-        onSurface: AppColors.textPrimary,
-      ),
+      colorScheme: scheme,
       textTheme: GoogleFonts.interTextTheme(base.textTheme).apply(
         bodyColor: AppColors.textPrimary,
         displayColor: AppColors.textPrimary,
       ),
-      appBarTheme: const AppBarTheme(
+      appBarTheme: AppBarTheme(
         backgroundColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
@@ -57,7 +60,7 @@ class AppTheme {
           borderRadius: BorderRadius.circular(AppRadius.card),
         ),
       ),
-      dividerTheme: const DividerThemeData(color: AppColors.border, thickness: 1),
+      dividerTheme: DividerThemeData(color: AppColors.border, thickness: 1),
     );
   }
 }

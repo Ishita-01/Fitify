@@ -76,23 +76,59 @@ class MockAnalysisRepository implements AnalysisRepository {
           DetectedIssue('Lower-back arch', 'moderate'),
           DetectedIssue('Head dropping', 'minor'),
         ];
-      case AnalyzableExercise.lunges:
-        return const [
-          DetectedIssue('Front knee past toes', 'moderate'),
-          DetectedIssue('Torso leaning forward', 'minor'),
-          DetectedIssue('Unstable back leg', 'moderate'),
-        ];
       case AnalyzableExercise.deadlift:
         return const [
           DetectedIssue('Rounded back', 'major'),
           DetectedIssue('Bar drifting away from shins', 'moderate'),
           DetectedIssue('Hips rising too early', 'moderate'),
         ];
+      case AnalyzableExercise.romanianDeadlift:
+        return const [
+          DetectedIssue('Rounding at the lower back', 'major'),
+          DetectedIssue('Bending the knees too much', 'moderate'),
+          DetectedIssue('Limited hip hinge depth', 'minor'),
+        ];
       case AnalyzableExercise.shoulderPress:
         return const [
           DetectedIssue('Excessive lower-back arch', 'moderate'),
           DetectedIssue('Uneven left/right press', 'minor'),
           DetectedIssue('Incomplete lockout', 'minor'),
+        ];
+      case AnalyzableExercise.pullUp:
+        return const [
+          DetectedIssue('Partial range — chin not over the bar', 'moderate'),
+          DetectedIssue('Using leg kip for momentum', 'minor'),
+          DetectedIssue('Shrugged shoulders at the bottom', 'moderate'),
+        ];
+      case AnalyzableExercise.hammerCurl:
+        return const [
+          DetectedIssue('Swinging the elbows', 'moderate'),
+          DetectedIssue('Incomplete stretch at the bottom', 'minor'),
+          DetectedIssue('Wrist rolling inward', 'minor'),
+        ];
+      case AnalyzableExercise.lateralRaise:
+        return const [
+          DetectedIssue('Raising above shoulder height', 'moderate'),
+          DetectedIssue('Using momentum / trap shrug', 'moderate'),
+          DetectedIssue('Bent elbows dropping the load', 'minor'),
+        ];
+      case AnalyzableExercise.legRaises:
+        return const [
+          DetectedIssue('Lower-back lifting off the floor', 'major'),
+          DetectedIssue('Bending the knees too early', 'minor'),
+          DetectedIssue('Dropping legs too fast', 'moderate'),
+        ];
+      case AnalyzableExercise.russianTwist:
+        return const [
+          DetectedIssue('Rotating from arms, not the torso', 'moderate'),
+          DetectedIssue('Rounded back', 'moderate'),
+          DetectedIssue('Uneven left/right rotation', 'minor'),
+        ];
+      case AnalyzableExercise.hipThrust:
+        return const [
+          DetectedIssue('Incomplete hip lockout at the top', 'moderate'),
+          DetectedIssue('Over-arching the lower back', 'moderate'),
+          DetectedIssue('Heels too far forward', 'minor'),
         ];
     }
   }
@@ -118,23 +154,59 @@ class MockAnalysisRepository implements AnalysisRepository {
           'Tuck your pelvis to remove the lower-back arch.',
           'Keep your neck neutral — gaze just ahead of your hands.',
         ];
-      case AnalyzableExercise.lunges:
-        return const [
-          'Keep your front shin vertical; knee over the ankle.',
-          'Stay tall through the torso.',
-          'Slow the descent for more control and balance.',
-        ];
       case AnalyzableExercise.deadlift:
         return const [
           'Maintain a neutral spine — hinge from the hips.',
           'Keep the bar close, dragging up your shins.',
           'Push the floor away; let hips and chest rise together.',
         ];
+      case AnalyzableExercise.romanianDeadlift:
+        return const [
+          'Keep a soft knee bend and push the hips back.',
+          'Stop when you feel the hamstring stretch — keep the spine flat.',
+          'Drag the weight close to your legs the whole way.',
+        ];
       case AnalyzableExercise.shoulderPress:
         return const [
           'Squeeze your glutes to stop the back arching.',
           'Press both arms evenly to lockout.',
           'Finish with biceps by your ears.',
+        ];
+      case AnalyzableExercise.pullUp:
+        return const [
+          'Pull until your chin clears the bar each rep.',
+          'Start from a full dead hang with shoulders pulled down.',
+          'Control the descent — avoid kipping for momentum.',
+        ];
+      case AnalyzableExercise.hammerCurl:
+        return const [
+          'Pin your elbows to your sides — no swinging.',
+          'Fully straighten at the bottom for a complete stretch.',
+          'Keep a neutral wrist throughout the curl.',
+        ];
+      case AnalyzableExercise.lateralRaise:
+        return const [
+          'Raise only to shoulder height — no higher.',
+          'Lead with the elbows and keep the traps relaxed.',
+          'Lower slowly; resist the weight on the way down.',
+        ];
+      case AnalyzableExercise.legRaises:
+        return const [
+          'Press your lower back into the floor the whole set.',
+          'Keep your legs straighter for a longer lever.',
+          'Lower with control — about a 2-second descent.',
+        ];
+      case AnalyzableExercise.russianTwist:
+        return const [
+          'Rotate from your torso, not just your arms.',
+          'Sit tall with a flat back and braced core.',
+          'Touch evenly on both sides for balanced rotation.',
+        ];
+      case AnalyzableExercise.hipThrust:
+        return const [
+          'Drive hips to a full lockout — squeeze the glutes at the top.',
+          'Keep ribs down to avoid arching the lower back.',
+          'Set heels under your knees for the best line of drive.',
         ];
     }
   }

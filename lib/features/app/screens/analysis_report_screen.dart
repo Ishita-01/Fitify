@@ -29,7 +29,7 @@ class AnalysisReportScreen extends StatelessWidget {
                 const SizedBox(width: 16),
                 Text('Analysis Report', style: AppTextStyles.heading),
                 const Spacer(),
-                const Icon(Icons.ios_share_rounded,
+                Icon(Icons.ios_share_rounded,
                     size: 20, color: AppColors.textSecondary),
               ],
             ),

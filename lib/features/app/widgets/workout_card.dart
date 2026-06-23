@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/widgets/glass.dart';
 import '../../../data/models/workout.dart';
 import '../screens/workout_detail_screen.dart';
 
@@ -18,19 +19,10 @@ class WorkoutCard extends StatelessWidget {
           builder: (_) => WorkoutDetailScreen(workout: workout))),
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(18),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFF1B2559).withValues(alpha: 0.05),
-              blurRadius: 14,
-              offset: const Offset(0, 6),
-            ),
-          ],
-        ),
-        child: Row(
+        child: GlassSurface(
+          radius: 20,
+          padding: const EdgeInsets.all(12),
+          child: Row(
           children: [
             Container(
               width: 60,
@@ -63,9 +55,10 @@ class WorkoutCard extends StatelessWidget {
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right_rounded,
+            Icon(Icons.chevron_right_rounded,
                 color: AppColors.textTertiary),
           ],
+          ),
         ),
       ),
     );

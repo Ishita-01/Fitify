@@ -1,0 +1,14 @@
+{
+  "deadlift": 0,
+  "hammer curl": 1,
+  "hip thrust": 2,
+  "lateral raise": 3,
+  "leg raises": 4,
+  "plank": 5,
+  "pull up": 6,
+  "push-up": 7,
+  "romanian deadlift": 8,
+  "russian twist": 9,
+  "shoulder press": 10,
+  "squat": 11
+}

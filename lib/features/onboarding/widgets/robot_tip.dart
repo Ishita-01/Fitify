@@ -14,8 +14,10 @@ class RobotTip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(14, 16, 16, 16),
       decoration: BoxDecoration(
-        color: AppColors.onbTip,
+        color: AppColors.onbTip.withValues(alpha: 0.70),
         borderRadius: BorderRadius.circular(18),
+        border:
+            Border.all(color: Colors.white.withValues(alpha: 0.75), width: 1),
       ),
       child: Stack(
         children: [
