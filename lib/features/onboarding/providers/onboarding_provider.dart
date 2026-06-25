@@ -50,6 +50,17 @@ class OnboardingProvider extends ChangeNotifier {
       _update(_profile.copyWith(intensity: v));
   void setName(String v) => _update(_profile.copyWith(name: v));
 
+  Future<void> clearProfile() async {
+    _profile = const UserProfile(
+      heightCm: 170,
+      currentWeightKg: 70,
+      targetWeightKg: 65,
+      onboardingComplete: false,
+    );
+    await _storage.saveProfile(_profile);
+    notifyListeners();
+  }
+
   // ---- Multi-select toggles ----
   void toggleGoal(FitnessGoal goal) {
     final goals = List<FitnessGoal>.from(_profile.goals);

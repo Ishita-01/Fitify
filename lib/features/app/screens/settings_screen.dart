@@ -7,6 +7,8 @@ import '../providers/theme_provider.dart';
 import '../providers/units_controller.dart';
 import '../widgets/app_widgets.dart';
 import 'info_screens.dart';
+import '../../onboarding/providers/onboarding_provider.dart';
+import '../../onboarding/screens/welcome_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -95,7 +97,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
             const SizedBox(height: 24),
             Center(
               child: TextButton(
-                onPressed: () {},
+                onPressed: () {
+                  context.read<OnboardingProvider>().clearProfile();
+                  Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(builder: (_) => const WelcomeScreen()),
+                    (route) => false,
+                  );
+                },
                 child: Text('Sign Out',
                     style: AppTextStyles.label.copyWith(color: AppColors.danger)),
               ),

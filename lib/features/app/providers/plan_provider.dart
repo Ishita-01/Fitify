@@ -26,6 +26,7 @@ class PlanProvider extends ChangeNotifier {
 
   TrainingPlan? get plan => _plan;
   bool get hasPlan => _plan != null;
+  DateTime get startDate => _startDate;
 
   // ---- 28-day program timeline (Home) ----
   static const int kProgramDays = 28;
@@ -91,7 +92,7 @@ class PlanProvider extends ChangeNotifier {
   /// a brand-new plan also (re)starts the progression clock.
   void updateProfile(UserProfile profile, {bool resetStart = false}) {
     _profile = profile;
-    if (resetStart) {
+    if (resetStart || !profile.onboardingComplete) {
       _startDate = DateTime.now();
       _completedIds.clear();
       _persist();
