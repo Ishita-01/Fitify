@@ -32,17 +32,21 @@ class AnalysisProvider extends ChangeNotifier {
     var detected = AnalyzableExercise
         .values[_rng.nextInt(AnalyzableExercise.values.length)];
     int? detectedScore;
+    int? formScore;
+    int? repCount;
+    int? holdSeconds;
+    String? overlayVideoPath;
 
     if (videoPath != null) {
       try {
-        debugPrint('Running ML prediction on video path: $videoPath');
+        debugPrint('Running ML prediction & shadow trainer on video path: $videoPath');
         final process = await Process.run(
           'python',
           [
-            'scripts/predict.py',
+            'scripts/shadow_trainer.py',
+            videoPath,
             '--onnx',
             'fitify_pose_gru.onnx',
-            videoPath,
           ],
         );
 
@@ -78,6 +82,20 @@ class AnalysisProvider extends ChangeNotifier {
                 detectedScore = int.tryParse(match.group(2) ?? '');
               }
             }
+
+            // Parse reps or twists: e.g. "6 reps, form 49/100" or "12 twists, form 72/100"
+            final repMatch = RegExp(r'(\d+)\s+(?:reps|twists),\s+form\s+(\d+)/100').firstMatch(trimmed);
+            if (repMatch != null) {
+              repCount = int.tryParse(repMatch.group(1) ?? '');
+              formScore = int.tryParse(repMatch.group(2) ?? '');
+            }
+
+            // Parse holds: e.g. "30s hold, form 81/100"
+            final holdMatch = RegExp(r'(\d+)s\s+hold,\s+form\s+(\d+)/100').firstMatch(trimmed);
+            if (holdMatch != null) {
+              holdSeconds = int.tryParse(holdMatch.group(1) ?? '');
+              formScore = int.tryParse(holdMatch.group(2) ?? '');
+            }
           }
 
           if (detectedSlug != null) {
@@ -87,10 +105,24 @@ class AnalysisProvider extends ChangeNotifier {
               final normalizedValSlug = val.slug.replaceAll(RegExp(r'[\s\-_]'), '');
               if (normalizedValSlug == normalizedDetected) {
                 detected = val;
-                debugPrint('Successfully matched exercise: ${val.label} with score: $detectedScore');
+                debugPrint('Successfully matched exercise: ${val.label} with confidence score: $detectedScore, form score: $formScore, reps: $repCount, hold: $holdSeconds');
                 break;
               }
             }
+          }
+
+          // Construct and verify the overlay video path
+          final fileStem = videoPath.split(RegExp(r'[/\\]')).last;
+          final dotIdx = fileStem.lastIndexOf('.');
+          final stem = dotIdx != -1 ? fileStem.substring(0, dotIdx) : fileStem;
+          final safe = stem.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '_');
+          final safeCut = safe.length > 48 ? safe.substring(0, 48) : safe;
+          final candidatePath = 'results/shadow/$safeCut/${safeCut}_overlay.mp4';
+          if (File(candidatePath).existsSync()) {
+            overlayVideoPath = candidatePath;
+            debugPrint('Found overlay video file at: $overlayVideoPath');
+          } else {
+            debugPrint('Overlay video file not found at candidate path: $candidatePath');
           }
         } else {
           debugPrint('ML script stderr:\n${process.stderr}');
@@ -113,7 +145,14 @@ class AnalysisProvider extends ChangeNotifier {
     // A small delay for UI transition smoothness
     await Future<void>.delayed(const Duration(milliseconds: 1500));
 
-    final done = _repo.generateReport(detected, score: detectedScore);
+    final done = _repo.generateReport(
+      detected,
+      score: detectedScore,
+      formScore: formScore,
+      repCount: repCount,
+      holdSeconds: holdSeconds,
+      overlayVideoPath: overlayVideoPath,
+    );
     final idx = _reports.indexWhere((r) => r.id == placeholder.id);
     if (idx >= 0) _reports[idx] = done;
     notifyListeners();

@@ -10,7 +10,14 @@ abstract class AnalysisRepository {
   List<AnalysisReport> seedHistory();
 
   /// Produce a completed report for [exercise] (stands in for the ML result).
-  AnalysisReport generateReport(AnalyzableExercise exercise, {int? score});
+  AnalysisReport generateReport(
+    AnalyzableExercise exercise, {
+    int? score,
+    int? formScore,
+    int? repCount,
+    int? holdSeconds,
+    String? overlayVideoPath,
+  });
 }
 
 class MockAnalysisRepository implements AnalysisRepository {
@@ -25,16 +32,37 @@ class MockAnalysisRepository implements AnalysisRepository {
       ];
 
   @override
-  AnalysisReport generateReport(AnalyzableExercise exercise, {int? score}) {
-    // Introduce a small +/- 3 point fluctuation to simulate frame-by-frame 
-    // landmark detection jitter in real-time/runtime runs.
-    final base = score != null
+  AnalysisReport generateReport(
+    AnalyzableExercise exercise, {
+    int? score,
+    int? formScore,
+    int? repCount,
+    int? holdSeconds,
+    String? overlayVideoPath,
+  }) {
+    // If formScore is provided directly from the ML script, use it. Otherwise,
+    // introduce a small +/- 3 point fluctuation on confidence.
+    final base = formScore ?? (score != null
         ? (score - 3 + _rng.nextInt(7)).clamp(40, 99)
-        : (70 + _rng.nextInt(25)); // 70..94
-    return _build(exercise, DateTime.now(), base);
+        : (70 + _rng.nextInt(25))); // 70..94
+    return _build(
+      exercise,
+      DateTime.now(),
+      base,
+      repCount: repCount,
+      holdSeconds: holdSeconds,
+      overlayVideoPath: overlayVideoPath,
+    );
   }
 
-  AnalysisReport _build(AnalyzableExercise ex, DateTime when, int overall) {
+  AnalysisReport _build(
+    AnalyzableExercise ex,
+    DateTime when,
+    int overall, {
+    int? repCount,
+    int? holdSeconds,
+    String? overlayVideoPath,
+  }) {
     int near() => (overall - 8 + _rng.nextInt(16)).clamp(40, 99);
     final metrics = [
       MetricScore('Posture', near()),
@@ -60,6 +88,9 @@ class MockAnalysisRepository implements AnalysisRepository {
       metrics: metrics,
       issues: issuePool.take(issueCount).toList(),
       recommendations: recsPool.take(issueCount + 1).toList(),
+      repCount: repCount,
+      holdSeconds: holdSeconds,
+      overlayVideoPath: overlayVideoPath,
     );
   }
 

@@ -356,6 +356,7 @@ def main(a):
     else:
         ex, conf = classify(arr, a.onnx, id_to_label)
     print(f"  exercise: {ex} ({conf:.0%})", flush=True)
+    print(f"  >>> {ex.upper()}   confidence {conf:.0%}", flush=True)
 
     res = analyze(arr, ex, fps)
     if res["kind"] == "hold":
@@ -378,7 +379,7 @@ def main(a):
     render_dashboard(res, conf, os.path.basename(a.video), png)
     write_report(res, conf, os.path.basename(a.video), md,
                  os.path.basename(png), os.path.basename(mp4))
-    print(f"\n✓ {outdir}/")
+    print(f"\nSUCCESS: {outdir}/")
     print(f"    {os.path.basename(mp4)}\n    {os.path.basename(png)}\n    {os.path.basename(md)}")
 
 

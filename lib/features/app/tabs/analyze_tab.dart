@@ -27,7 +27,7 @@ class _AnalyzeTabState extends State<AnalyzeTab> {
     if (path == null) return;
     setState(() {
       _videoPath = path;
-      _fileName = path.split('/').last;
+      _fileName = path.split(RegExp(r'[/\\]')).last;
     });
   }
 
@@ -268,6 +268,9 @@ class DottedUploadBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final has = fileName != null;
+    // Extract just the file name if a full path slipped through.
+    final displayFileName = has ? fileName!.split(RegExp(r'[/\\]')).last : '';
+
     return LiquidPanel(
       radius: 20,
       tint: has ? AppColors.accentSoft : null,
@@ -281,7 +284,7 @@ class DottedUploadBox extends StatelessWidget {
           Icon(has ? Icons.check_circle_rounded : Icons.cloud_upload_outlined,
               size: 40, color: AppColors.accent),
           const SizedBox(height: 10),
-          Text(has ? fileName! : 'Tap to upload a video',
+          Text(has ? displayFileName : 'Tap to upload a video',
               style: AppTextStyles.title.copyWith(fontSize: 15)),
           const SizedBox(height: 4),
           Text(has ? 'Ready to analyze' : 'MP4 · up to 60s works best',

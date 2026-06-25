@@ -53,6 +53,10 @@ class AnalysisReport {
   final List<DetectedIssue> issues;
   final List<String> recommendations;
 
+  final int? repCount;
+  final int? holdSeconds;
+  final String? overlayVideoPath;
+
   const AnalysisReport({
     required this.id,
     required this.exercise,
@@ -62,6 +66,9 @@ class AnalysisReport {
     this.metrics = const [],
     this.issues = const [],
     this.recommendations = const [],
+    this.repCount,
+    this.holdSeconds,
+    this.overlayVideoPath,
   });
 
   AnalysisReport copyWith({
@@ -70,6 +77,9 @@ class AnalysisReport {
     List<MetricScore>? metrics,
     List<DetectedIssue>? issues,
     List<String>? recommendations,
+    int? repCount,
+    int? holdSeconds,
+    String? overlayVideoPath,
   }) {
     return AnalysisReport(
       id: id,
@@ -80,6 +90,9 @@ class AnalysisReport {
       metrics: metrics ?? this.metrics,
       issues: issues ?? this.issues,
       recommendations: recommendations ?? this.recommendations,
+      repCount: repCount ?? this.repCount,
+      holdSeconds: holdSeconds ?? this.holdSeconds,
+      overlayVideoPath: overlayVideoPath ?? this.overlayVideoPath,
     );
   }
 }
