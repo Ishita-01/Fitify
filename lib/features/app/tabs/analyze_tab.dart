@@ -63,13 +63,15 @@ class _AnalyzeTabState extends State<AnalyzeTab> {
 
   Future<void> _runAnalysis() async {
     final provider = context.read<AnalysisProvider>();
-    final exercise = provider.selected;
     showDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (_) => const _ProcessingDialog(),
     );
-    final report = await provider.submit(exercise, fileName: _fileName ?? 'clip.mp4');
+    final report = await provider.submit(
+      fileName: _fileName ?? 'clip.mp4',
+      videoPath: _videoPath,
+    );
     if (!mounted) return;
     Navigator.of(context).pop(); // dismiss processing
     setState(() {
@@ -82,7 +84,7 @@ class _AnalyzeTabState extends State<AnalyzeTab> {
 
   @override
   Widget build(BuildContext context) {
-    final provider = context.watch<AnalysisProvider>();
+    final provider = context.read<AnalysisProvider>();
     final history = provider.reports;
 
     return SafeArea(
@@ -97,17 +99,12 @@ class _AnalyzeTabState extends State<AnalyzeTab> {
                   AppTextStyles.body.copyWith(color: AppColors.textSecondary)),
           const SizedBox(height: 20),
 
-          // Step 1 — select exercise.
-          Text('1. Select exercise', style: AppTextStyles.title),
-          const SizedBox(height: 10),
-          _ExerciseDropdown(
-            value: provider.selected,
-            onChanged: (e) => provider.select(e),
-          ),
-          const SizedBox(height: 20),
-
-          // Step 2 — upload video.
-          Text('2. Upload your video', style: AppTextStyles.title),
+          // Upload video — exercise is auto-classified by ML.
+          Text('Upload your video', style: AppTextStyles.title),
+          const SizedBox(height: 4),
+          Text('Our AI will auto-detect the exercise from your video.',
+              style: AppTextStyles.caption
+                  .copyWith(color: AppColors.accent, fontSize: 12)),
           const SizedBox(height: 10),
           GestureDetector(
             onTap: _showUploadOptions,
@@ -154,43 +151,7 @@ class _AnalyzeTabState extends State<AnalyzeTab> {
   }
 }
 
-class _ExerciseDropdown extends StatelessWidget {
-  const _ExerciseDropdown({required this.value, required this.onChanged});
-  final AnalyzableExercise value;
-  final ValueChanged<AnalyzableExercise> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    return GlassSurface(
-      radius: 16,
-      opacity: 0.45,
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<AnalyzableExercise>(
-          value: value,
-          isExpanded: true,
-          borderRadius: BorderRadius.circular(14),
-          icon: Icon(Icons.keyboard_arrow_down_rounded,
-              color: AppColors.textSecondary),
-          items: [
-            for (final e in AnalyzableExercise.values)
-              DropdownMenuItem(
-                value: e,
-                child: Row(
-                  children: [
-                    Icon(e.icon, size: 20, color: AppColors.accent),
-                    const SizedBox(width: 12),
-                    Text(e.label, style: AppTextStyles.title.copyWith(fontSize: 15.5)),
-                  ],
-                ),
-              ),
-          ],
-          onChanged: (e) => e == null ? null : onChanged(e),
-        ),
-      ),
-    );
-  }
-}
+// Exercise dropdown removed — ML auto-classifies the exercise from the video.
 
 class _UploadSheet extends StatelessWidget {
   const _UploadSheet();
@@ -480,9 +441,9 @@ class _ProcessingDialog extends StatelessWidget {
                 height: 46,
                 child: CircularProgressIndicator(strokeWidth: 3)),
             const SizedBox(height: 20),
-            Text('Analyzing your video…', style: AppTextStyles.title),
+            Text('Classifying exercise…', style: AppTextStyles.title),
             const SizedBox(height: 6),
-            Text('Running pose & movement evaluation',
+            Text('AI is detecting the exercise & analyzing your form',
                 textAlign: TextAlign.center,
                 style: AppTextStyles.caption
                     .copyWith(color: AppColors.textTertiary)),

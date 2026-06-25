@@ -65,3 +65,12 @@ archive/
 
 # Fitify secrets
 assets/.env
+
+# Visual Studio
+.vs/
+
+# Video files
+*.mp4
+*.mov
+*.mkv
+*.avi

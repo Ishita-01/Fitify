@@ -10,7 +10,7 @@ abstract class AnalysisRepository {
   List<AnalysisReport> seedHistory();
 
   /// Produce a completed report for [exercise] (stands in for the ML result).
-  AnalysisReport generateReport(AnalyzableExercise exercise);
+  AnalysisReport generateReport(AnalyzableExercise exercise, {int? score});
 }
 
 class MockAnalysisRepository implements AnalysisRepository {
@@ -25,8 +25,12 @@ class MockAnalysisRepository implements AnalysisRepository {
       ];
 
   @override
-  AnalysisReport generateReport(AnalyzableExercise exercise) {
-    final base = 70 + _rng.nextInt(25); // 70..94
+  AnalysisReport generateReport(AnalyzableExercise exercise, {int? score}) {
+    // Introduce a small +/- 3 point fluctuation to simulate frame-by-frame 
+    // landmark detection jitter in real-time/runtime runs.
+    final base = score != null
+        ? (score - 3 + _rng.nextInt(7)).clamp(40, 99)
+        : (70 + _rng.nextInt(25)); // 70..94
     return _build(exercise, DateTime.now(), base);
   }
 
@@ -40,16 +44,19 @@ class MockAnalysisRepository implements AnalysisRepository {
       MetricScore('Stability', near()),
     ];
 
+    // Compute overall score dynamically as the average of the metrics
+    final dynamicOverall = (metrics.map((m) => m.score).reduce((a, b) => a + b) / metrics.length).round();
+
     final issuePool = _issuesFor(ex);
     final recsPool = _recsFor(ex);
-    final issueCount = overall >= 88 ? 1 : (overall >= 78 ? 2 : 3);
+    final issueCount = dynamicOverall >= 88 ? 1 : (dynamicOverall >= 78 ? 2 : 3);
 
     return AnalysisReport(
       id: 'r${when.microsecondsSinceEpoch}',
       exercise: ex,
       createdAt: when,
       status: AnalysisStatus.complete,
-      overallScore: overall,
+      overallScore: dynamicOverall,
       metrics: metrics,
       issues: issuePool.take(issueCount).toList(),
       recommendations: recsPool.take(issueCount + 1).toList(),

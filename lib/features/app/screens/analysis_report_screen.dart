@@ -14,6 +14,9 @@ class AnalysisReportScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scoreColor = _scoreColor(report.overallScore);
+    final labels = report.metrics.map((m) => m.label).toList();
+    final values = report.metrics.map((m) => m.score).toList();
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -40,15 +43,47 @@ class AnalysisReportScreen extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 18),
               child: Column(
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(report.exercise.icon, size: 18, color: AppColors.accent),
-                      const SizedBox(width: 8),
-                      Text(report.exercise.label, style: AppTextStyles.title),
-                    ],
+                  // AI-detected exercise badge.
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 14, vertical: 7),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          AppColors.accent.withValues(alpha: 0.15),
+                          const Color(0xFFA855F7).withValues(alpha: 0.12),
+                        ],
+                      ),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: AppColors.accent.withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.auto_awesome_rounded,
+                            size: 14, color: Color(0xFFA855F7)),
+                        const SizedBox(width: 6),
+                        Text('AI Detected',
+                            style: AppTextStyles.caption.copyWith(
+                              color: const Color(0xFFA855F7),
+                              fontWeight: FontWeight.w700,
+                              fontSize: 10,
+                            )),
+                        const SizedBox(width: 6),
+                        Icon(report.exercise.icon,
+                            size: 14, color: AppColors.accent),
+                        const SizedBox(width: 4),
+                        Text(report.exercise.label,
+                            style: AppTextStyles.label.copyWith(
+                              color: AppColors.accent,
+                              fontSize: 13,
+                            )),
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 6),
                   Text(_date(report.createdAt),
                       style: AppTextStyles.caption
                           .copyWith(color: AppColors.textTertiary)),
@@ -86,21 +121,143 @@ class AnalysisReportScreen extends StatelessWidget {
             ),
             const SizedBox(height: 22),
 
-            // Radar chart.
+            // ── 4-CHART PERFORMANCE BREAKDOWN ──
             Text('Performance Breakdown', style: AppTextStyles.heading),
             const SizedBox(height: 14),
-            DarkCard(
-              child: Center(
-                child: RadarChart(
-                  labels: report.metrics.map((m) => m.label).toList(),
-                  values: report.metrics.map((m) => m.score).toList(),
-                  size: 250,
-                ),
-              ),
+
+            // 2×2 chart grid.
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final halfWidth = (constraints.maxWidth - 12) / 2;
+                return Wrap(
+                  spacing: 12,
+                  runSpacing: 12,
+                  children: [
+                    // Top-left: Radar Chart.
+                    SizedBox(
+                      width: halfWidth,
+                      child: DarkCard(
+                        padding: const EdgeInsets.all(12),
+                        child: Column(
+                          children: [
+                            Text('Radar Overview',
+                                style: AppTextStyles.label.copyWith(
+                                    color: AppColors.textSecondary,
+                                    fontSize: 11)),
+                            const SizedBox(height: 4),
+                            RadarChart(
+                              labels: labels,
+                              values: values,
+                              size: halfWidth - 36,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    // Top-right: Horizontal Bar Chart.
+                    SizedBox(
+                      width: halfWidth,
+                      child: DarkCard(
+                        padding: const EdgeInsets.all(12),
+                        child: Column(
+                          children: [
+                            Text('Metric Scores',
+                                style: AppTextStyles.label.copyWith(
+                                    color: AppColors.textSecondary,
+                                    fontSize: 11)),
+                            const SizedBox(height: 8),
+                            HorizontalBarChart(
+                              labels: labels,
+                              values: values,
+                              height: halfWidth - 56,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    // Bottom-left: Concentric Rings.
+                    SizedBox(
+                      width: halfWidth,
+                      child: DarkCard(
+                        padding: const EdgeInsets.all(12),
+                        child: Column(
+                          children: [
+                            Text('Ring Gauge',
+                                style: AppTextStyles.label.copyWith(
+                                    color: AppColors.textSecondary,
+                                    fontSize: 11)),
+                            const SizedBox(height: 8),
+                            Center(
+                              child: ConcentricRingsChart(
+                                labels: labels,
+                                values: values,
+                                size: halfWidth - 50,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            // Ring legend.
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 4,
+                              alignment: WrapAlignment.center,
+                              children: [
+                                for (var i = 0; i < labels.length; i++)
+                                  Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Container(
+                                        width: 8,
+                                        height: 8,
+                                        decoration: BoxDecoration(
+                                          color: ConcentricRingsChart
+                                              .ringColors[i %
+                                              ConcentricRingsChart
+                                                  .ringColors.length],
+                                          shape: BoxShape.circle,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 3),
+                                      Text(labels[i].split(' ').first,
+                                          style: AppTextStyles.caption.copyWith(
+                                            fontSize: 8,
+                                            color: AppColors.textTertiary,
+                                          )),
+                                    ],
+                                  ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    // Bottom-right: Vertical Bar Chart.
+                    SizedBox(
+                      width: halfWidth,
+                      child: DarkCard(
+                        padding: const EdgeInsets.all(12),
+                        child: Column(
+                          children: [
+                            Text('Score Distribution',
+                                style: AppTextStyles.label.copyWith(
+                                    color: AppColors.textSecondary,
+                                    fontSize: 11)),
+                            const SizedBox(height: 8),
+                            VerticalBarChart(
+                              labels: labels,
+                              values: values,
+                              height: halfWidth - 80,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              },
             ),
             const SizedBox(height: 16),
 
-            // Per-metric bars.
+            // Per-metric bars (detailed).
             DarkCard(
               child: Column(
                 children: [
