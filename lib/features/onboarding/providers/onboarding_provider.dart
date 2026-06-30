@@ -50,6 +50,8 @@ class OnboardingProvider extends ChangeNotifier {
       _update(_profile.copyWith(intensity: v));
   void setName(String v) => _update(_profile.copyWith(name: v));
 
+  void updateProfile(UserProfile next) => _update(next);
+
   Future<void> clearProfile() async {
     _profile = const UserProfile(
       heightCm: 170,

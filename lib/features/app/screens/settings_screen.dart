@@ -9,6 +9,7 @@ import '../widgets/app_widgets.dart';
 import 'info_screens.dart';
 import '../../onboarding/providers/onboarding_provider.dart';
 import '../../onboarding/screens/welcome_screen.dart';
+import 'edit_preferences_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -46,7 +47,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             const SizedBox(height: 24),
             _group('Account', [
-              _Row(icon: Icons.person_outline_rounded, label: 'My Profile & Goal'),
+              _Row(
+                icon: Icons.person_outline_rounded,
+                label: 'Edit Preferences',
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const EditPreferencesScreen()),
+                ),
+              ),
               _Row(
                   icon: Icons.workspace_premium_outlined,
                   label: 'Subscription',
@@ -113,6 +120,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
     );
   }
+
 
   Widget _group(String title, List<Widget> rows) {
     return Column(

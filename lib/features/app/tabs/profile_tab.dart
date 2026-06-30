@@ -6,7 +6,6 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/glass.dart';
 import '../../../data/models/analysis.dart';
 import '../../../data/models/training_plan.dart';
-import '../../../data/models/onboarding_enums.dart';
 import '../../onboarding/providers/onboarding_provider.dart';
 import '../providers/analysis_provider.dart';
 import '../providers/plan_provider.dart';
@@ -87,20 +86,6 @@ class ProfileTab extends StatelessWidget {
                                 .copyWith(color: AppColors.textSecondary),
                           ),
                         ],
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () => _editProfile(context, onb),
-                      child: Container(
-                        padding:
-                            const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: AppColors.accentMuted,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text('Edit',
-                            style: AppTextStyles.label
-                                .copyWith(color: AppColors.accent)),
                       ),
                     ),
                   ],
@@ -422,171 +407,6 @@ class ProfileTab extends StatelessWidget {
             style: AppTextStyles.caption.copyWith(color: AppColors.textTertiary)),
         Text(value, style: AppTextStyles.statValue.copyWith(color: c)),
       ],
-    );
-  }
-
-  void _editProfile(BuildContext context, OnboardingProvider onb) {
-    final nameController = TextEditingController(text: onb.profile.name ?? '');
-    final heightController = TextEditingController(text: onb.profile.heightCm?.toString() ?? '');
-    final weightController = TextEditingController(text: onb.profile.currentWeightKg?.toString() ?? '');
-    final targetWeightController = TextEditingController(text: onb.profile.targetWeightKg?.toString() ?? '');
-
-    showDialog<void>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.surface,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text('Edit Profile', style: AppTextStyles.title),
-        content: StatefulBuilder(
-          builder: (context, setState) => SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: nameController,
-                  textCapitalization: TextCapitalization.words,
-                  cursorColor: AppColors.accent,
-                  decoration: InputDecoration(
-                    labelText: 'Name',
-                    labelStyle: TextStyle(color: AppColors.textSecondary),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: AppColors.accent),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: AppColors.surfaceHighlight),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: heightController,
-                  keyboardType: TextInputType.number,
-                  cursorColor: AppColors.accent,
-                  decoration: InputDecoration(
-                    labelText: 'Height (cm)',
-                    labelStyle: TextStyle(color: AppColors.textSecondary),
-                    suffixText: 'cm',
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: AppColors.accent),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: AppColors.surfaceHighlight),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: weightController,
-                  keyboardType: TextInputType.number,
-                  cursorColor: AppColors.accent,
-                  decoration: InputDecoration(
-                    labelText: 'Current Weight (kg)',
-                    labelStyle: TextStyle(color: AppColors.textSecondary),
-                    suffixText: 'kg',
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: AppColors.accent),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: AppColors.surfaceHighlight),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: targetWeightController,
-                  keyboardType: TextInputType.number,
-                  cursorColor: AppColors.accent,
-                  decoration: InputDecoration(
-                    labelText: 'Target Weight (kg)',
-                    labelStyle: TextStyle(color: AppColors.textSecondary),
-                    suffixText: 'kg',
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: AppColors.accent),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: AppColors.surfaceHighlight),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text('Edit Goals', style: AppTextStyles.label.copyWith(fontSize: 14)),
-                ),
-                const SizedBox(height: 10),
-                Wrap(
-                  spacing: 6,
-                  runSpacing: 6,
-                  children: [
-                    for (final goal in FitnessGoal.values)
-                      FilterChip(
-                        label: Text(
-                          goal.label,
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: onb.isGoalSelected(goal) ? Colors.white : AppColors.textSecondary,
-                          ),
-                        ),
-                        selected: onb.isGoalSelected(goal),
-                        selectedColor: AppColors.accent,
-                        backgroundColor: AppColors.surfaceHighlight,
-                        checkmarkColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          side: BorderSide(color: Colors.transparent),
-                        ),
-                        onSelected: (bool selected) {
-                          setState(() {
-                            onb.toggleGoal(goal);
-                          });
-                        },
-                      ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.of(ctx).pop(),
-              child: Text('Cancel',
-                  style: AppTextStyles.label
-                      .copyWith(color: AppColors.textSecondary))),
-          TextButton(
-              onPressed: () {
-                final name = nameController.text.trim();
-                final height = int.tryParse(heightController.text);
-                final currentWeight = int.tryParse(weightController.text);
-                final targetWeight = int.tryParse(targetWeightController.text);
-
-                if (name.isNotEmpty) {
-                  onb.setName(name);
-                }
-                if (height != null) {
-                  onb.setHeight(height);
-                }
-                if (currentWeight != null) {
-                  onb.setCurrentWeight(currentWeight);
-                }
-                if (targetWeight != null) {
-                  onb.setTargetWeight(targetWeight);
-                }
-                onb.finish(); // Persist changes to local storage
-                Navigator.of(ctx).pop();
-              },
-              child: Text('Save',
-                  style: AppTextStyles.label.copyWith(color: AppColors.accent))),
-        ],
-      ),
     );
   }
 
